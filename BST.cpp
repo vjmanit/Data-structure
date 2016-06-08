@@ -1,27 +1,41 @@
 #include<bits/stdc++.h>
 using namespace std;
-typedef struct node
+struct node
 {
- int data;
+ int val;
  struct node *left;
  struct node *right;
-} node;
+ struct node *parent;
+};
+#define p parent
+#define l left
+#define r right
 node *root,*child;
 class BST
 {
-   public:
+    /*private
+        node *root;*/
+    public:
+        /*BST() {
+            root=NULL;
+        }*/
+        node* tree_maximum(node *);
+        node* tree_minimum(node *);
+        node* tree_search(node *,int );
+        node* tree_successor(node *);
+        node* tree_predecessor(node *);
+        void tree_insert(int );
+        void display(node *);
+        void inorder(node *);
+        void preorder(node *);
+        void postorder(node *);
+        void delete_node(node *,int );
+        node* find_node(node *,int);
 
-       void insert(int );
-       void display(node *);
-       void inorder(node *);
-       void preorder(node *);
-       void postorder(node *);
-       void delete_node(node *,int );
-       node* find_node(node *,int);
-       //void delete_node(node *,int);
-       void delete_0(node *,node *);
-       void delete_1(node *,node *);
-       void delete_2(node *,node *);
+        void delete_0(node *);
+        void delete_1(node *);
+        void delete_2(node *);
+
 };
 int main()
 {
@@ -45,7 +59,7 @@ int main()
         case 1:
            cout<<"Enter the Number you want to insert :";
            cin>>x;
-           bst.insert(x);
+           bst.tree_insert(x);
            break;
 
        case 2:
@@ -59,6 +73,7 @@ int main()
            break;
        case 5:
            bst.postorder(root);
+           break;
        case 6:
            cout<<"Enter element to be deleted :";
            cin>>x;
@@ -72,44 +87,98 @@ int main()
     }
     return 0;
 }
+node* BST::tree_search(node *root1,int x) {
+    if(root1==NULL) {
+        return NULL;
+    }
+    if(x==root1->val)
+        return root1;
+    else if(x>root1->val) {
+        return (tree_search(root1->right,x));
+    }
+    return(tree_search(root1->left,x));
+}
+node* BST::tree_maximum(node *root1) {
+    if(root1==NULL) {
+        return NULL;
+    }
+    if(root1->right==NULL) {
+        return(root1);
+    }
+    return tree_maximum(root1->right);
+}
+node* BST::tree_minimum(node *root1) {
+    if(root1==NULL) {
+        return NULL;
+    }
+    if(root1->left==NULL) {
+        return(root1);
+    }
+    return tree_minimum(root1->left);
+}
+node* BST::tree_successor(node *root1) {
+    if(root1->right!=NULL)
+        return (tree_minimum(root1->right));
+    node *temp=root1->p;
+    // temp=NULL that means no successor i.e. given node has highest value
+    while(temp->p!=NULL&&temp->right==root1) {
+        root1=temp;
+        temp=root1->p;
+    }
+    return temp;
 
+
+}
+node* BST::tree_predecessor(node *root1){
+    if(root1->left!=NULL)
+        return tree_maximum(root1->left);
+    node *temp=root1->p;
+    while(temp->p!=NULL&&temp->left==root1) {
+        root1=temp;
+        temp=root1->p;
+    }
+    return temp;
+}
 void BST::display(node *root1)
 {
     if(root1==NULL)
         return;
-    cout<<root1->data<<endl;
+    cout<<root1->val<<endl;
     display(root1->left);
     display(root1->right);
 }
-void BST::insert(int x)
+void BST::tree_insert(int x)
 {
     node *temp=new node,*temp1,*prev;
-    temp->data=x;
+    temp->val=x;
     temp->left=NULL;
     temp->right=NULL;
+    temp->p=NULL;
     if(root==NULL)
     {
         root=temp;
+        root->p=NULL;
         return ;
     }
     temp1=root;
     while(temp1!=NULL)
     {
         prev=temp1;
-        if(temp1->data==x)
+        if(temp1->val==x)
         {
             cout<<"Element is already in the tree"<<endl;
             return;
         }
-        if(temp1->data>x)
+        if(temp1->val>x)
             temp1=temp1->left;
         else
             temp1=temp1->right;
     }
-    if(prev->data>x)
+    if(prev->val>x)
         prev->left=temp;
     else
         prev->right=temp;
+    temp->p=prev;
 
 }
 void BST::inorder(node *root1)
@@ -118,7 +187,7 @@ void BST::inorder(node *root1)
         return;
 
     inorder(root1->left);
-    cout<<root1->data<<endl;
+    cout<<root1->val<<endl;
     inorder(root1->right);
 
 }
@@ -128,111 +197,93 @@ void BST::postorder(node *root1)
         return;
     postorder(root1->left);
     postorder(root1->right);
-    cout<<root1->data<<endl;
+    cout<<root1->val<<endl;
 }
 void BST::preorder(node *root1)
 {
     if(root1==NULL)
         return;
-    cout<<root1->data<<endl;
+    cout<<root1->val<<endl;
     preorder(root1->left);
     preorder(root1->right);
 }
+
 void BST::delete_node(node *root1,int x)
 {
-   node *parent=find_node(root1,x);
-   if(child==NULL)
-   {
-       cout<<"No such element found"<<endl;
-       return;
-   }
-   if(child->left==NULL&&child->right==NULL);
-      delete_0(child,parent);
-}
-
-void BST::delete_0(node *child,node *parent)
-{
-    if((parent->left)->data==child->data)
-        parent->left=NULL;
-    else
-        parent->right=NULL;
-    delete child;
-    child=NULL;
-    cout<<"Node deleted\n";
-
-}
-void BST::delete_1(node *child,node *parent)
-{
-    node *temp;
-    if(child->left==NULL)
-        temp=child->right;
-    else
-        temp=child->left;
-    if(parent->data==child->data)
+    node *curr=tree_search(root1,x);
+    if(curr==NULL)
     {
-        parent->data=temp->data;
-        delete temp;
-        parent->left=NULL;
-        parent->right=NULL;
+        cout<<"No such element found"<<endl;
         return;
     }
-    if((parent->left)->data==child->data)
-        parent->left=temp;
+    if(curr->left==NULL&&curr->right==NULL)
+        delete_0(curr);
+    else if(curr->left!=NULL&&curr->right==NULL||curr->right!=NULL&&curr->left==NULL)
+        delete_1(curr);
     else
-        parent->right=temp;
-    delete child;
+        delete_2(curr);
+
+}
+
+void BST::delete_0(node *curr) {
+    node *par=curr->p;
+    if(curr->p==NULL)
+        root=NULL;
+
+    else if(par->left==curr)
+        par->left=NULL;
+    else
+        par->right=NULL;
+    delete curr;
     cout<<"Node deleted\n";
 }
-node* BST::find_node(node *p,int x)
+void BST::delete_1(node *curr)
 {
-    node *parent;
-    if(p==NULL)
-    {
-        cout<<"Your BST is empty\n";
-        return NULL;
-    }
-    parent=p;
-    while(p!=NULL&&p->data!=x)
-    {
-        parent=p;
-        if(p->data>x)
-        {
-            p=p->left;
-        }
-        else
-        {
-            p=p->right;
-        }
-    }
-    child=p;
-    return parent;
+    node *par=curr->p,*temp;
 
+    if(curr->left!=NULL)
+        temp=curr->left;
+    else if(curr->right!=NULL)
+        temp=curr->right;
+    if(par==NULL)
+        temp->p=par;
+
+    else if(curr==par->left)
+        par->left=temp;
+    else if(curr==par->right)
+        par->right=temp;
+    temp->p=par;
+    delete curr;
+    cout<<"Node deleted\n";
 }
-void BST::delete_2(node* child,node* parent )
-{
-    node *temp=child->right,*prev=child,*curr;
-    while(temp->left!=NULL)
-    {
-        prev=temp;
-        temp=temp->left;
+
+void BST::delete_2(node* curr)  {
+    node *succ=tree_successor(curr);
+    node *par=curr->p;
+    if(succ==curr->right) {
+        if(par==NULL)
+            succ->p=NULL;
+        else if(par->left==curr)
+            par->left=succ;
+        else
+            par->right=succ;
+        succ->left=curr->left;
+        succ->p=par;
     }
-    if(prev->right!=temp)
-    {
-        temp->right=child->right;
-        temp->left=child->left;
+    else {
+        cout<<"11111"<<endl;
+        (succ->p)->left=succ->right;
+        if(succ->right!=NULL)
+            (succ->right)->p=succ->p;
+
+        succ->p=curr->p;
+        succ->right=curr->right;
+        succ->left=curr->left;
+
+        (curr->right)->p=succ;
+        (curr->left)->p=succ;
 
     }
-    else
-    {
-        temp->right=NULL;
-        temp->left=child->left;
-    }
-    if(parent->data!=child->data)
-    {
-        if((parent->left)->data==child->data&&parent->left!=NULL)
-            parent->left=temp;
-        else
-            parent->right=temp;
-    }
-     return ;
+    delete curr;
+
 }
