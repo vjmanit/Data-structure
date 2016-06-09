@@ -179,6 +179,7 @@ void BST::tree_insert(int x)
     else
         prev->right=temp;
     temp->p=prev;
+    cout<<"Node Inserted\n";
 
 }
 void BST::inorder(node *root1)
@@ -245,6 +246,8 @@ void BST::delete_1(node *curr)
         temp=curr->left;
     else if(curr->right!=NULL)
         temp=curr->right;
+    if(root==curr)
+        root=temp;
     if(par==NULL)
         temp->p=par;
 
@@ -253,37 +256,57 @@ void BST::delete_1(node *curr)
     else if(curr==par->right)
         par->right=temp;
     temp->p=par;
+
     delete curr;
     cout<<"Node deleted\n";
 }
 
 void BST::delete_2(node* curr)  {
     node *succ=tree_successor(curr);
+    //cout<<succ->val<<endl;
     node *par=curr->p;
+
+
+    if(root==curr)
+        root=succ;
     if(succ==curr->right) {
-        if(par==NULL)
-            succ->p=NULL;
-        else if(par->left==curr)
-            par->left=succ;
-        else
-            par->right=succ;
+
+        if(par!=NULL) {
+
+            if(par->left==curr)
+                par->left=succ;
+            else
+                par->right=succ;
+        }
         succ->left=curr->left;
-        succ->p=par;
+        (curr->left)->p=succ;
+        (curr->right)->p=succ;
+
+
     }
     else {
-        cout<<"11111"<<endl;
+
+
         (succ->p)->left=succ->right;
         if(succ->right!=NULL)
             (succ->right)->p=succ->p;
-
-        succ->p=curr->p;
         succ->right=curr->right;
         succ->left=curr->left;
-
-        (curr->right)->p=succ;
         (curr->left)->p=succ;
+        (curr->right)->p=succ;
+        if(par!=NULL) {
+
+            if(par->left==curr)
+                par->left=succ;
+            else
+                par->right=succ;
+        }
+
 
     }
+
+    succ->p=par;
     delete curr;
+    cout<<"Node deleted\n";
 
 }
